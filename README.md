@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Die Trauer von Sam — Hard Land
 
-## Getting Started
+> Ein interaktives Deutsch-Referat über Benedict Wells' Roman *Hard Land* (2021).  
+> Gedicht, Traueranalyse und Hilfsangebote — gestaltet als filmisches Web-Erlebnis.
 
-First, run the development server:
+---
+
+## 📖 Über das Projekt
+
+Diese Website entstand als Deutsch-Referat für die Analyse des Romans **Hard Land** von Benedict Wells.  
+Sie verbindet ein eigenes Gedicht über die Trauer der Hauptfigur Sam mit einer interaktiven Analyse der fünf Trauerphasen nach **Elisabeth Kübler-Ross** sowie regionalen Hilfsangeboten im Rhein-Sieg-Kreis.
+
+**Inhalt der Seite:**
+- 🎭 **Gedicht** — 9 Strophen über Verlust, Einsamkeit und Akzeptanz
+- 📂 **Traueranalyse** — Die fünf Phasen nach Kübler-Ross, verknüpft mit Szenen aus Hard Land
+- 💙 **Hilfsangebote** — Lokale und bundesweite Anlaufstellen (Rhein-Sieg-Kreis, NRW)
+
+---
+
+## 🛠️ Tech Stack
+
+| Technologie | Zweck |
+|---|---|
+| [Next.js 16](https://nextjs.org) | React Framework (App Router) |
+| [Framer Motion](https://www.framer.com/motion/) | Scroll- & Eintrittsanimationen |
+| [Tailwind CSS v4](https://tailwindcss.com) | Styling |
+| [Lucide React](https://lucide.dev) | Icons |
+| Canvas API | Partikel-Hintergrundanimation |
+| TypeScript | Typsicherheit |
+
+---
+
+## 🚀 Lokale Entwicklung
 
 ```bash
+# Abhängigkeiten installieren
+npm install
+
+# Entwicklungsserver starten
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Die Seite ist dann unter [http://localhost:3000](http://localhost:3000) erreichbar.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Produktions-Build erstellen
+npm run build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Build lokal vorschauen
+npm start
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 📁 Projektstruktur
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+├── app/
+│   ├── page.tsx          # Hauptseite (Gedicht, Analyse, Hilfe)
+│   ├── layout.tsx        # Root Layout & Fonts
+│   ├── globals.css       # Globale Styles & Animationen
+│   ├── impressum/        # Impressum-Seite
+│   └── datenschutz/      # Datenschutz-Seite
+└── components/
+    └── ParticleField.tsx  # Canvas-Partikelanimation (nur Desktop)
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## ⚡ Performance-Optimierungen (Mobile)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **ParticleField** ist auf Mobilgeräten (`< 768px`) komplett deaktiviert
+- **Film-Grain-Animation** läuft nur auf Desktop
+- **Scroll-basierte Animationen** (`useScroll`) werden auf Mobile durch einfache `whileInView`-Animationen ersetzt
+- `prefers-reduced-motion` wird respektiert — alle dekorativen Animationen deaktivieren sich automatisch
+- `backdrop-filter: blur()` ist auf Mobile per CSS deaktiviert
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 📚 Quellen
+
+- Wells, B. (2021). *Hard Land*. Suhrkamp Verlag.
+- Kübler-Ross, E. (1969). *On Death and Dying*. Macmillan.
+- Telefonseelsorge: [online-beratung.de](https://www.online-beratung.de)
+- Jugendnotmail: [jugendnotmail.de](https://www.jugendnotmail.de)
+
+---
+
+## ✍️ Autor
+
+**Bünyamin Dagdelen** · Deutsch-Referat 2026  
+Gedicht, Design & Entwicklung: Bünyamin Dagdelen
