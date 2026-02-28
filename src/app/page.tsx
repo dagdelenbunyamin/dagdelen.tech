@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -251,10 +251,66 @@ const hilfsangebote = [
 
 function StanzaBlock({ stanza, index }: { stanza: typeof poemStanzas[0]; index: number }) {
   const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "center center"] });
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+  }, []);
+
+  // Auf Mobile: useScroll nicht verwenden (zu teuer bei vielen Elementen)
+  const { scrollYProgress } = useScroll({
+    target: isMobile ? undefined : ref,
+    offset: ["start end", "center center"],
+  });
   const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [0, 1, 1]);
   const y = useTransform(scrollYProgress, [0, 0.5], [60, 0]);
   const isEven = index % 2 === 0;
+
+  if (isMobile) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        viewport={{ once: true, margin: "-40px" }}
+        className={`relative flex ${isEven ? "justify-start" : "justify-end"} px-4`}
+      >
+        <div className="relative max-w-2xl w-full">
+          <div
+            className="relative rounded-lg overflow-hidden notebook-lines"
+            style={{
+              background: "linear-gradient(135deg, rgba(10,22,40,0.97) 0%, rgba(5,13,26,0.99) 100%)",
+              border: "1px solid rgba(245,158,11,0.15)",
+              boxShadow: "0 4px 40px rgba(0,0,0,0.6), inset 0 0 20px rgba(245,158,11,0.03)",
+            }}
+          >
+            <div className="absolute -top-1 left-8 w-16 h-3 bg-amber-400/30 rotate-1 rounded" />
+            <div className="absolute left-12 top-0 bottom-0 w-px" style={{ background: "rgba(239,68,68,0.2)" }} />
+            <div className="absolute left-4 top-4 w-4 h-4 rounded-full bg-[#050d1a] border border-amber-500/20 flex items-center justify-center">
+              <span className="text-[8px] font-mono" style={{ color: "rgba(245,158,11,0.5)" }}>{stanza.id}</span>
+            </div>
+            <div className="pl-16 pr-8 py-8">
+              {stanza.lines.map((line, i) => (
+                <p
+                  key={i}
+                  className="text-lg leading-[32px]"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: "italic", color: "#fef3c7", letterSpacing: "0.02em" }}
+                >
+                  {line}
+                </p>
+              ))}
+            </div>
+            <div className="flex items-center gap-2 px-16 pb-4" style={{ borderTop: "1px solid rgba(56,189,248,0.08)" }}>
+              <div className="w-1 h-1 rounded-full" style={{ background: "#38bdf8" }} />
+              <span className="text-xs font-mono tracking-widest uppercase" style={{ color: "rgba(56,189,248,0.5)" }}>
+                {stanza.note}
+              </span>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div ref={ref} style={{ opacity, y }} className={`relative flex ${isEven ? "justify-start" : "justify-end"} px-4 md:px-0`}>
@@ -397,13 +453,12 @@ function HilfsangebotCard({ item, index }: { item: typeof hilfsangebote[0]; inde
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -6, boxShadow: `0 24px 48px rgba(0,0,0,0.5), 0 0 24px ${item.accent}25` }}
       transition={{ delay: index * 0.08, duration: 0.5 }}
       viewport={{ once: true, margin: "-30px" }}
-      className={`rounded-2xl p-6 bg-gradient-to-br ${item.color} relative overflow-hidden`}
-      style={{ border: `1px solid ${item.accent}25`, backdropFilter: "blur(10px)", willChange: "transform" }}
+      className={`rounded-2xl p-6 bg-gradient-to-br ${item.color} relative overflow-hidden backdrop-blur-none-mobile`}
+      style={{ border: `1px solid ${item.accent}25`, backdropFilter: "blur(10px)", willChange: "opacity, transform" }}
     >
-      <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full blur-3xl opacity-20" style={{ background: item.accent }} />
+      <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full blur-3xl opacity-20 hidden md:block" style={{ background: item.accent }} />
       <span
         className="absolute top-4 right-4 px-2 py-0.5 rounded-md text-xs font-mono tracking-wider"
         style={{ background: `${item.accent}20`, color: item.accent, border: `1px solid ${item.accent}30` }}
@@ -452,10 +507,15 @@ function HilfsangebotCard({ item, index }: { item: typeof hilfsangebote[0]; inde
 
 export default function Page() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const { scrollYProgress } = useScroll({ target: containerRef });
   const heroOpacity = useTransform(scrollYProgress, [0, 0.08], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.08], [1, 0.95]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.08], [1, 0.97]);
   const progressBar = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+  }, []);
 
   return (
     <div ref={containerRef} className="film-grain relative">
@@ -509,7 +569,7 @@ export default function Page() {
 
       {/* HERO */}
       <motion.section
-        style={{ opacity: heroOpacity, scale: heroScale }}
+        style={isMobile ? { opacity: heroOpacity } : { opacity: heroOpacity, scale: heroScale }}
         className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
       >
         <div
@@ -520,7 +580,7 @@ export default function Page() {
         />
         <div className="absolute top-8 left-8 opacity-10"><Film size={48} className="text-amber-400" /></div>
         <div className="absolute bottom-8 right-8 opacity-10"><Film size={32} className="text-amber-400" /></div>
-        {[...Array(24)].map((_, i) => (
+        {!isMobile && [...Array(24)].map((_, i) => (
           <div
             key={i}
             className="absolute w-px h-px bg-amber-200 rounded-full pulse-slow"

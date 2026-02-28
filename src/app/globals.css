@@ -55,15 +55,26 @@ body {
   90% { transform: translate(-4%, 2%); }
 }
 
-.film-grain::after {
-  content: '';
-  position: fixed;
-  inset: -200%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-  opacity: 0.15;
-  pointer-events: none;
-  z-index: 9999;
-  animation: grain 0.5s steps(1) infinite;
+/* Film-grain nur auf Desktop – auf Mobile zu GPU-intensiv */
+@media (min-width: 768px) {
+  .film-grain::after {
+    content: '';
+    position: fixed;
+    inset: -200%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 9999;
+    animation: grain 0.8s steps(1) infinite;
+  }
+}
+
+/* Reduced-motion: alle dekorativen Animationen deaktivieren */
+@media (prefers-reduced-motion: reduce) {
+  .film-grain::after { display: none; }
+  .pulse-slow { animation: none; opacity: 0.5; }
+  .float { animation: none; }
+  .flicker { animation: none; }
 }
 
 /* Glow text */
@@ -101,7 +112,7 @@ body {
 }
 .flicker { animation: flicker 8s infinite; }
 
-/* Scanlines */
+/* Scanlines – nur Desktop */
 .scanlines {
   background: repeating-linear-gradient(
     0deg,
@@ -112,12 +123,16 @@ body {
   );
   pointer-events: none;
 }
+@media (max-width: 767px) {
+  .scanlines { display: none; }
+}
 
 @keyframes pulse-slow {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 0.8; }
 }
-.pulse-slow { animation: pulse-slow 4s ease-in-out infinite; }
+/* Langsamere Animation – weniger CPU */
+.pulse-slow { animation: pulse-slow 6s ease-in-out infinite; }
 
 @keyframes float {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -146,4 +161,12 @@ body {
 ::selection {
   background: rgba(245, 158, 11, 0.3);
   color: #fef3c7;
+}
+
+/* Backdrop-blur auf Mobile deaktivieren (GPU-intensiv) */
+@media (max-width: 767px) {
+  .backdrop-blur-none-mobile {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }

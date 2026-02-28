@@ -18,11 +18,21 @@ export default function ParticleField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const animFrameRef = useRef<number>(0);
+  const frameSkipRef = useRef<number>(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+
+    // Auf Mobile komplett deaktivieren
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) return;
+
+    // Reduced-motion: ebenfalls deaktivieren
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
+    const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
     const colors = [
@@ -56,8 +66,9 @@ export default function ParticleField() {
       };
     };
 
-    // Initial particles
-    for (let i = 0; i < 60; i++) {
+    // Weniger initiale Partikel auf Desktop
+    const initialCount = 40;
+    for (let i = 0; i < initialCount; i++) {
       const p = spawn();
       p.y = Math.random() * canvas.height;
       p.life = Math.random() * p.maxLife;
@@ -65,10 +76,16 @@ export default function ParticleField() {
     }
 
     const animate = () => {
+      animFrameRef.current = requestAnimationFrame(animate);
+
+      // Jeden zweiten Frame überspringen → ~30fps statt 60fps
+      frameSkipRef.current++;
+      if (frameSkipRef.current % 2 !== 0) return;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Spawn new particles
-      if (Math.random() < 0.4) {
+      // Spawn-Rate reduziert
+      if (Math.random() < 0.25) {
         particlesRef.current.push(spawn());
       }
 
@@ -79,9 +96,9 @@ export default function ParticleField() {
 
         const progress = p.life / p.maxLife;
         if (progress < 0.2) {
-          p.opacity = progress / 0.2 * 0.7;
+          p.opacity = (progress / 0.2) * 0.7;
         } else if (progress > 0.8) {
-          p.opacity = (1 - progress) / 0.2 * 0.7;
+          p.opacity = ((1 - progress) / 0.2) * 0.7;
         } else {
           p.opacity = 0.7;
         }
@@ -93,8 +110,6 @@ export default function ParticleField() {
 
         return p.life < p.maxLife && p.y > -10;
       });
-
-      animFrameRef.current = requestAnimationFrame(animate);
     };
 
     animate();
@@ -102,13 +117,14 @@ export default function ParticleField() {
     return () => {
       window.removeEventListener("resize", resize);
       cancelAnimationFrame(animFrameRef.current);
+      particlesRef.current = [];
     };
   }, []);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-10"
+      className="fixed inset-0 pointer-events-none z-10 hidden md:block"
       style={{ mixBlendMode: "screen" }}
     />
   );
